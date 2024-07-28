@@ -1,0 +1,23 @@
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  height: 100dvh;
+  width: 100%;
+  font-size: 32px;
+  color: red;
+
+  .new-task-form, .new-task-input {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+  }
+
+  .new-task-form {
+    .new-task-input {
+      width: 100%;
+    }
+  }
+}
