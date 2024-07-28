@@ -1,9 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
 
-import { todosSelector } from "../../store/slices/todosSlice";
-import { addTodo, removeTodo } from "../../store/slices/todosSlice";
+import { useAddTodoMutation, useGetTodosQuery } from "../../store/api/todosApi";
 
 const App = () => {
   const {
@@ -13,16 +11,27 @@ const App = () => {
     reset,
   } = useForm();
 
-  const { todos } = useSelector(todosSelector);
-  const dispatch = useDispatch();
+  const { data: todos, isLoading, isError, error } = useGetTodosQuery();
+  const [addTodo, { isLoading: isAddTodoLoading }] = useAddTodoMutation();
 
-  const getNewTask = (data) => {
+  const getNewTask = async (data) => {
     console.log(data);
 
-    dispatch(addTodo({ task: data.newTask }));
+    try {
+      await addTodo({
+        userId: 1,
+        id: Date.now(),
+        title: data.newTask,
+        completed: false,
+      }).unwrap();
+    } catch (error) {
+      console.error(error);
+    }
 
     reset();
   };
+
+  if (isError) return <div>{JSON.stringify(error)}</div>;
 
   return (
     <div className="app">
@@ -46,22 +55,26 @@ const App = () => {
           <input type="submit" value="Создать" />
         </form>
 
-        <ul className="todo-list">
-          {todos.map((todo) => {
-            return (
-              <li key={todo.id}>
-                <span>{todo.task}</span>
-                <button
-                  onClick={() => {
-                    dispatch(removeTodo({ id: todo.id }));
-                  }}
-                >
-                  Удалить
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : (
+          <ul className="todo-list">
+            {todos.map((todo) => {
+              return (
+                <li key={todo.id}>
+                  <span>{todo.title}</span>
+                  <button
+                    onClick={() => {
+                      dispatch(removeTodo({ id: todo.id }));
+                    }}
+                  >
+                    Удалить
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </main>
     </div>
   );
