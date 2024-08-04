@@ -1,7 +1,9 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { useForm } from "react-hook-form";
 
-import { useAddTodoMutation, useGetTodosQuery } from "../../store/api/todosApi";
+import { useAddTodoMutation, useGetTodosQuery, useDeleteTodoMutation} from "../../store/api/services/todosApi";
+import {useDispatch} from "react-redux";
+import {logIn} from "../../store/slices/authSlice";
 
 const App = () => {
   const {
@@ -13,6 +15,8 @@ const App = () => {
 
   const { data: todos, isLoading, isError, error } = useGetTodosQuery();
   const [addTodo, { isLoading: isAddTodoLoading }] = useAddTodoMutation();
+  const [deleteTodo] = useDeleteTodoMutation();
+  const dispatch = useDispatch();
 
   const getNewTask = async (data) => {
     console.log(data);
@@ -30,6 +34,10 @@ const App = () => {
 
     reset();
   };
+
+  useEffect(() => {
+    dispatch(logIn({id: 1, auth: true}));
+  }, []);
 
   if (isError) return <div>{JSON.stringify(error)}</div>;
 
@@ -64,8 +72,12 @@ const App = () => {
                 <li key={todo.id}>
                   <span>{todo.title}</span>
                   <button
-                    onClick={() => {
-                      dispatch(removeTodo({ id: todo.id }));
+                    onClick={async () => {
+                      try {
+                        await deleteTodo(todo.id).unwrap();
+                      } catch (error) {
+                        console.error(error);
+                      }
                     }}
                   >
                     Удалить
