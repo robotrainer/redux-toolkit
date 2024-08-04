@@ -1,16 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import todosReducer from "./slices/todosSlice";
+import authReducer from "./slices/authSlice";
 
-import { todosApi } from "./api/todosApi";
+import { api } from "./api";
 
 export const store = configureStore({
   reducer: {
     todos: todosReducer,
+    auth: authReducer,
 
-    [todosApi.reducerPath]: todosApi.reducer,
+    [api.reducerPath]: api.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(todosApi.middleware),
+    getDefaultMiddleware().concat(api.middleware),
 });
